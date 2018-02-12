@@ -1,0 +1,30 @@
+- name: lamp
+  hosts: centoslamp
+  tasks:
+   - name: update
+     yum: name="*" state=latest
+   - name: disableselinux
+     lineinfile: dest=/etc/selinux/config regexp="^SELINUX=enforcing" line="SELINUX=disabled" state=present
+   - name: installrepo epel
+     yum_repository:
+      name: epel
+      description: EPEL YUM repo
+      baseurl: https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
+      gpgcheck: no
+   - name: install nginx
+     yum: name=nginx state=latest
+   - name: install httpd
+     yum: name=httpd state=latest
+   - name: repomysql
+     yum_repository:
+      name: mysql5.7
+      description: Mysql 5.7
+      baseurl: http://repo.mysql.com/yum/mysql-5.7-community/el/7/$basearch/
+      gpgcheck: no
+   - name: install mysql
+     yum: name={{ item }}
+     with_items:
+      - mysql
+      - mysql-server
+   - name: mkdir domen
+     
