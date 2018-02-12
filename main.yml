@@ -1,12 +1,13 @@
 - name: lamp
   vars:
-   domname: test
+   domname: eblan-kurwa.com
+   phpversion: 71
   hosts: centoslamp
   tasks:
    - name: update
      yum: name="*" state=latest
    - name: disableselinux
-     lineinfile: dest=/etc/selinux/config regexp="^SELINUX=enforcing" line="SELINUX=disabled" state=present
+     replace: path=/etc/selinux/config regexp="^SELINUX=enforcing$" replace="SELINUX=disabled"
    - name: installrepo epel
      yum_repository:
       name: epel
@@ -30,3 +31,36 @@
       - mysql-server
    - name: mkdir
      file: path=/var/www/{{ domname}} state=directory owner=apache group=apache
+   - include: nginx.yml
+   - include: apache.yml
+   - name: chown
+     command: chown -R apache.apache /var/lib/nginx
+   - name: firewalld
+     firewalld:
+      port: 80/tcp 
+      permanent: true
+      state: enabled
+     notify: restart firewalld
+   - name: enable service
+     systemd: name={{ item}} enabled=true state=started
+     with_items:
+      - httpd
+      - nginx
+      - mysqld
+   - name: remi
+     yum: name=http://rpms.remirepo.net/enterprise/remi-release-7.rpm state=latest
+   - name: php
+     yum: name={{ item }} state=latest enablerepo=remi,remi-php{{ phpversion }}
+     with_items:
+      - php
+      - php-mcrypt
+      - php-mysql
+      - php-gd
+      - php-mbstring
+  handlers:
+  - name: restart apache
+    service: name=httpd state=restarted
+  - name: restart nginx
+    service: name=nginx state=restarted 
+  - name: restart firewalld
+    service: name=firewalld state=restarted
