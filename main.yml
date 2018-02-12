@@ -1,4 +1,6 @@
 - name: lamp
+  vars:
+   domname: test
   hosts: centoslamp
   tasks:
    - name: update
@@ -26,5 +28,5 @@
      with_items:
       - mysql
       - mysql-server
-   - name: mkdir domen
-     
+   - name: mkdir
+     file: path=/var/www/{{ domname}} state=directory owner=apache group=apache
