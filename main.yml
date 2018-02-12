@@ -1,6 +1,6 @@
 - name: lamp
   vars:
-   domname: eblan-kurwa.com
+   domname: test.com
    phpversion: 71
   hosts: centoslamp
   tasks:
