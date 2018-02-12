@@ -1,15 +1,7 @@
-#- name: apache
-#  vars:
-#   domname: test
-#  hosts: centoslamp
-# tasks:
    - name: disable default listen
      replace: dest=/etc/httpd/conf/httpd.conf regexp="^Listen 80$" replace="Listen 127.0.0.1:8080"
      notify: restart apache
    - name: create vhost
      template: src=templates/vhostapache.j2 dest=/etc/httpd/conf.d/{{ domname}}.conf
      notify: restart apache
-#  handlers:
-#   - name: restart apache
-#     service: name=httpd state=restarted
 
