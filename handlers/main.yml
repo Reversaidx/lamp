@@ -1,0 +1,7 @@
+  - name: restart apache
+    service: name={{ apache_serv }} state=restarted
+  - name: restart nginx
+    service: name=nginx state=restarted 
+  - name: restart firewalld
+    service: name=firewalld state=restarted
+

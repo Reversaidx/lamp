@@ -1,0 +1,4 @@
+#Domain name for new domen
+domname: test.com
+#Php version to install
+phpversion: 71

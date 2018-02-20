@@ -1,11 +1,3 @@
-- name: centos_lamp
-  vars:
-   domname: test.com
-   phpversion: 71
-  hosts: centoslamp
-  tasks:
-   - name: update
-     yum: name="*" state=latest
    - name: disableselinux
      replace: path=/etc/selinux/config regexp="^SELINUX=enforcing$" replace="SELINUX=disabled"
    - name: installrepo epel
@@ -31,8 +23,18 @@
       - mysql-server
    - name: mkdir
      file: path=/var/www/{{ domname}} state=directory owner=apache group=apache
-   - include: nginx.yml
-   - include: apache.yml
+   - name: disable default listen
+     replace: dest=/etc/httpd/conf/httpd.conf regexp="^Listen 80$" replace="Listen 127.0.0.1:8080"
+     notify: restart apache
+   - name: create vhost
+     template: src=templates/vhostapache.j2 dest=/etc/httpd/conf.d/{{ domname}}.conf
+     notify: restart apache
+   - name: copy default config
+     template: src=templates/nginx.conf.j2 dest=/etc/nginx/nginx.conf
+     notify: restart nginx
+   - name: copy vhost
+     template: src=templates/vhostnginx.j2 dest=/etc/nginx/conf.d/{{ domname }}.conf
+     notify: restart nginx
    - name: chown
      command: chown -R apache.apache /var/lib/nginx
    - name: firewalld
@@ -57,10 +59,3 @@
       - php-mysql
       - php-gd
       - php-mbstring
-  handlers:
-  - name: restart apache
-    service: name=httpd state=restarted
-  - name: restart nginx
-    service: name=nginx state=restarted 
-  - name: restart firewalld
-    service: name=firewalld state=restarted

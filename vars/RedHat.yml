@@ -1,0 +1,2 @@
+nginx_user: apache
+apache_serv: httpd
