@@ -1,0 +1,68 @@
+- name: ubuntu16_lamp
+  hosts: ubuntu1
+  vars:
+   domname: test.com
+  tasks:
+   - name: install 
+     apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
+     with_items:
+      - git
+      - nginx
+      - mysql-server
+      - php
+      - php-mcrypt
+      - php-mysql
+      - php-gd
+      - php-mbstring
+   - name: install apache2
+     apt: name={{ item }}
+     with_items:
+      - libapache2-mod-php
+      - apache2
+   - name: create dir
+     file: path=/var/www/{{ domname }} state=directory owner=www-data group=www-data
+   - name: create dir
+     file: path=/var/www/{{ domname }} state=directory owner=www-data group=www-data recurse=yes
+
+   - name: remove def config
+     file:
+       path: "/etc/nginx/{{ item }}"
+       state: absent
+     with_items:
+      - sites-enabled/default 
+      - nginx.conf
+     notify: restart nginx
+
+   - name: copy main config
+     template: src=templates/nginx.conf.j2 dest=/etc/nginx/nginx.conf
+     notify: restart nginx
+
+   - name: copy default config
+     template: src=templates/default.conf.j2 dest=/etc/nginx/conf.d/{{ domname }}.conf
+     notify: restart nginx
+
+   - name: delete default
+     file: path={{ item }} state=absent
+     with_items:
+      - /etc/apache2/sites-enabled/default.conf
+     notify: restart apache
+
+   - name: apache2 listen on port 8081
+     lineinfile: dest=/etc/apache2/ports.conf regexp="^Listen 80" line="Listen 8080" state=present
+     notify: restart apache
+
+   - name: change timezone
+     lineinfile: dest=/etc/php/7.0/apache2/php.ini regexp="^;date.timezone =" line="date.timezone=Europe/Moscow" state=present
+     notify: restart apache
+
+   - name: copy config
+     template: src=templates/def_apache.conf.j2 dest=/etc/apache2/sites-available/{{ domname }}.conf
+     notify: restart apache
+   - name: ensite
+     command: a2ensite {{ domname }}
+
+  handlers:
+   - name: restart apache
+     service: name=apache2 state=restarted
+   - name: restart nginx
+     service: name=nginx state=restarted 

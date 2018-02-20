@@ -1,4 +1,4 @@
-- name: lamp
+- name: centos_lamp
   vars:
    domname: test.com
    phpversion: 71

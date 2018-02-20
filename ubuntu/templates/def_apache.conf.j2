@@ -1,0 +1,15 @@
+<VirtualHost 127.0.0.1:8080>
+	ServerName {{ domname }}
+	ServerAlias www.{{ domname }}
+	DocumentRoot /var/www/{{ domname }}
+	ServerAdmin webmaster@{{ domname }}
+	DirectoryIndex index.html index.php
+	AddDefaultCharset off
+	#SuexecUserGroup www-root www-root
+	CustomLog /var/log/apache2/access.log combined
+	ErrorLog /var/log/apache2/error.log
+</VirtualHost>
+<Directory /var/www/{{ domname }} >
+	Options +Includes +ExecCGI
+        allowoverride all
+</Directory>
