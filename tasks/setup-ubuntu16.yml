@@ -14,6 +14,7 @@
      with_items:
       - libapache2-mod-php
       - apache2
+      - libapache2-mod-rpaf
    - name: create dir
      file: path=/var/www/{{ domname }} state=directory owner=www-data group=www-data
    - name: create dir
